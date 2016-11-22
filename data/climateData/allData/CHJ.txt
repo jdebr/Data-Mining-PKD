@@ -1,0 +1,6 @@
+#DEBUG: Format Typ    -> tdf
+#DEBUG: Time Period   -> 2012-01-01 00:00:00+00:00 2016-11-22 00:00:00+00:00
+#DEBUG: Time Zone     -> Etc/UTC
+#DEBUG: Data Contact   -> daryl herzmann akrherz@iastate.edu 515-294-5978
+#DEBUG: Entries Found -> -1
+station	valid	lon	lat	tmpf	 dwpf	 relh	 drct	 sknt	 p01i	 alti	 mslp	 vsby	 gust	 skyc1	 skyc2	 skyc3	 skyc4	 skyl1	 skyl2	 skyl3	 skyl4	 presentwx	 metar
