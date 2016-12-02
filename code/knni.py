@@ -9,7 +9,7 @@ writePath = '../data/imputed data/'
 
 #for fn in os.listdir(dataPath):
 for i in range(1):
-  fn = '06037500-cleaned'
+  fn = '06038500.txt-cleaned'
 
   dataFile = dataPath + fn
   newFile = writePath + fn + "-imputed"
@@ -27,7 +27,7 @@ for i in range(1):
       originalData.append(dat)
       skip = False
       # currently 6 features
-      for i in range(1,7):
+      for i in [1,2,5]:
         if dat[i].strip() == 'M' or dat[i].strip() == '':
           #print("skipped")
           skip = True
@@ -44,8 +44,11 @@ for i in range(1):
         imputationSet.append(newDat)
         impIndex.append(ind)
         
-  #print(len(dataSet))
-  #print(len(labels))
+  print("Training Size")
+  print(len(dataSet))
+  print(len(labels))
+  print("Imputation Size")
+  print(len(imputationSet))
   
   # This section actually imputes unknown data, writing to a separate file
   trainData = np.array(dataSet)
