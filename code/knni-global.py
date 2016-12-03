@@ -4,25 +4,21 @@ from sklearn.metrics import mean_squared_error
 import os
 import csv
 
-dataPath = '../data/cleaned data/Global/'
+trainPath = '../data/cleaned data/Local/'
+imputePath = '../data/cleaned data/Global/'
 writePath = '../data/imputed data/Global/'
 
-for fn in os.listdir(dataPath):
 
-  dataFile = dataPath + fn
-  newFile = writePath + fn + "-imputed"
-  originalData = list()
-  dataSet = list()
-  imputationSet = list()
-  impIndex = list()
-  # labels are really just the feature we are interested in imputing, in this case water temp
-  labels = list()
+dataSet = list()
+labels = list()
 
+# Train model from datasets with temp values 
+for fn in os.listdir(trainPath):
+  dataFile = trainPath + fn
   with open(dataFile,'r') as f:
     rawData = f.read().splitlines()
     for ind, line in enumerate(rawData):
       dat = line.split(',')
-      originalData.append(dat)
       skip = False
       # currently 6 features
       for i in [1,2,5]:
@@ -36,25 +32,41 @@ for fn in os.listdir(dataPath):
         dataSet.append(newDat)
         # imputing watertemp
         labels.append(float(dat[1]))
+        
+# Set up KNNI using sklearn.neighbors.KNeighborsRegressor
+trainData = np.array(dataSet)
+neigh = neighbors.KNeighborsRegressor(n_neighbors=5,weights='distance')
+neigh.fit(trainData, labels)
+
+# Impute in each file 
+for fn in os.listdir(imputePath):
+  dataFile = imputePath + fn
+  newFile = writePath + fn + "-imputed"
+  
+  imputationSet = list()
+  impIndex = list()
+  originalData = list()
+
+  # build imputation set 
+  with open(dataFile,'r') as f:
+    rawData = f.read().splitlines()
+    for ind, line in enumerate(rawData):
+      dat = line.split(',')
+      originalData.append(dat)
+      skip = False
+      # if dat[2] == ' Ssn' or dat[5] == ' Ssn':
+        # print("RAT!")
+        # print(fn)
+        # print(ind)
       # if water temp is missing but discharge and airtemp are there, add to imputationSet 
-      elif (dat[1].strip() == '' or dat[1].strip() == 'Ssn') and not dat[2].strip() == '' and not dat[5].strip() == 'M':
+      if (dat[1].strip() == '' or dat[1].strip() == 'Ssn') and not dat[2].strip() == '' and not dat[2].strip() == 'Ssn' and not dat[2].strip() == 'Eqp' and not dat[2].strip() == 'Ice' and not dat[2].strip() == 'Rat' and not dat[5].strip() == 'M':
         newDat = [float(dat[2]), float(dat[5])]
         imputationSet.append(newDat)
         impIndex.append(ind)
         
-  print("Training Size")
-  print(len(dataSet))
-  print(len(labels))
-  print("Imputation Size")
-  print(len(imputationSet))
   
   # This section actually imputes unknown data, writing to a separate file
-  trainData = np.array(dataSet)
   testData = np.array(imputationSet)
-  
-  # Set up KNNI using sklearn.neighbors.KNeighborsRegressor
-  neigh = neighbors.KNeighborsRegressor(n_neighbors=5,weights='distance')
-  neigh.fit(trainData, labels)
   imputedValues = neigh.predict(testData)
   
   # Add imputed values to original data 
@@ -63,7 +75,6 @@ for fn in os.listdir(dataPath):
     originalData[i][1] = round(imputedValues[valCount], 1)
     valCount += 1
     
-  
   # Write all data to new file 
   with open(newFile, 'w') as w:
     writer = csv.writer(w, lineterminator='\n')
